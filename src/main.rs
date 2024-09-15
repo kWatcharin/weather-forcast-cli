@@ -1,39 +1,16 @@
 #![allow(unused)]
 mod env;
 mod models;
+mod services;
+
 use env::base_env::{load_env, API_KEY};
 use models::openweathermap::WeatherResponse;
+use services::{openweathermap::{get_weather_info, get_temperature_imoji}, Result};
 
-use serde::Deserialize;
 use std::sync::Arc;
+use std::process;
+use std::io;
 use colored::*;
-
-type Result<T, E = reqwest::Error> = core::result::Result<T, E>;
-
-
-
-fn get_weather_info(
-    city: &str, country_code: &str, api_key: &str
-) -> Result<WeatherResponse> {
-    let url = format!(
-        "http://api.openweathermap.org/data/2.5/weather?q={},{}&units=metric&appid={}",
-        city, country_code, api_key
-    );
-    let request = reqwest::blocking::get(&url)?;
-    let reseponse_json = request.json::<WeatherResponse>()?;
-
-    Ok(reseponse_json)
-}
-
-
-fn display_weather_info(response: &WeatherResponse) {
-    todo!()
-}
-
-
-fn get_temperature_imoji() -> &'static str {
-    todo!()
-}
 
 
 fn main() -> Result<()> {
@@ -43,9 +20,53 @@ fn main() -> Result<()> {
         .read()
         .unwrap();
 
-    println!("{}", "🌈 Welcome to weather status 🌞".bright_yellow());
+
+    println!("{}", "🌈 Welcome to weather station 🌞".bright_blue());
     
-    let result = get_weather_info("Bangkok", "TH", api_key)?;
-    println!("{:?}", result);
+
+    loop {
+        println!("{}", "Please, enter the name of the city!".bright_green());
+        let mut city = String::new();
+        io::stdin().read_line(&mut city)
+            .expect("Failed to read input!");
+        let city = city.trim();
+
+        println!(
+            "{}", 
+            "Please, enter the country code (e.g.,TH for Thailand or JP for Japan):".bright_green()
+        );
+        let mut country_code = String::new();
+        io::stdin()
+            .read_line(&mut country_code)
+            .expect("Failed to read input!");
+        let country_code = country_code.trim();
+
+
+        let result = get_weather_info(city, country_code, api_key)?;
+        let temperature = result.main.temp;
+        let temperature_imoji = get_temperature_imoji(temperature);
+        let temperature_text = format!("Temperature is {:?} °C {}.", temperature, temperature_imoji);
+        println!("{}", &temperature_text.bright_cyan());
+    
+
+        println!(
+            "{}",
+            "Do you want to search for weather in another city (y for yes / n for no):".bright_green()
+        );
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read input!");
+        let input = input.trim();
+
+        match input {
+            "n" => {
+                println!("{} 🙏", "Exit program!".bright_purple());
+                process::exit(0);
+            },
+            _ => ()
+        }
+    }
+
     Ok(())
 }
