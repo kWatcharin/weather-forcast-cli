@@ -1,4 +1,5 @@
 use crate::models::openweathermap::WeatherResponse;
+use colored::*;
 
 pub type Result<T, E = reqwest::Error> = core::result::Result<T, E>;
 
@@ -8,7 +9,45 @@ pub mod openweathermap {
 
 
     pub fn display_weather_info(response: &WeatherResponse) {
-        todo!()
+        let lat = response.coord.lat;
+        let lon = response.coord.lon;
+        let description = &response.weather[0].description;
+        let temperature = response.main.temp;
+        let humidity = response.main.humidity;
+        let pressure = response.main.pressure;
+        let wind_speed = response.wind.speed;
+
+        let weather_text = format!(
+            r#"
+Weather in {} (latitude: {}, longitude: {}): {} {}
+> Temperature: {:.1}°C,
+> Humidity: {:.1}%,
+> Pressure: {:.1} hPa,
+> Wind Speed: {:.} m/s
+"#, 
+            response.name, lat, lon, description, get_temperature_imoji(temperature), temperature,
+            humidity, pressure,wind_speed
+        );
+
+        let weather_text_colored = match description.as_str() {
+            "clear sky" => {
+                weather_text.bright_yellow()
+            },
+            "few clouds" | "scattered clouds" | "broken clouds" => {
+                weather_text.bright_blue()
+            },
+            "overcast clouds" | "mist" | "haze" | "smoke" | "dust" | "fog" | "squalls" => {
+                weather_text.dimmed()
+            },
+            "heavy intensity rain" | "moderate rain" | "shower rain" | "light rain" | "rain" | "thunderstorm" | "snow" => {
+                weather_text.bright_cyan()
+            },
+            _ => {
+                weather_text.normal()
+            }
+        };
+
+        println!("{}", weather_text_colored);
     }
     
     pub fn get_temperature_imoji(temperature: f64) -> &'static str {

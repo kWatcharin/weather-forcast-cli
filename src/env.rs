@@ -1,6 +1,6 @@
 use std::env;
 use std::sync::{Arc, RwLock};
-use dotenv::{dotenv, from_path};
+use dotenv::from_path;
 use lazy_static::lazy_static;
 
 
