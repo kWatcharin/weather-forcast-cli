@@ -23,7 +23,7 @@ Weather in {} (latitude: {}, longitude: {}): {} {}
 > Temperature: {:.1}°C,
 > Humidity: {:.1}%,
 > Pressure: {:.1} hPa,
-> Wind Speed: {:.} m/s
+> Wind Speed: {} m/s
 "#, 
             response.name, lat, lon, description, get_temperature_imoji(temperature), temperature,
             humidity, pressure,wind_speed
